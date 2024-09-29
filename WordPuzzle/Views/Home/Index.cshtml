@@ -1,30 +1,62 @@
-﻿@{
-    ViewBag.Title = "Home Page";
-}
+﻿@model WordPuzzle.ViewModels.PuzzleViewModel
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="p-3">
-            Puzzle Size:&nbsp;&nbsp;<input type="text" id="puzzleSize" name="puzzleSize" style="width: 50px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <input type="text" id="puzzleSize" name="puzzleSize">&nbsp;&nbsp;
-            <a class="btn btn-default" href="">Add Word</a>&nbsp;&nbsp;
-            <a class="btn btn-default" href="">Remove Last Word</a>&nbsp;&nbsp;
-            <a class="btn btn-default" href="">Clear All Words</a>
-        </div>       
-    </div>
-</div>
+<head>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#buildPuzzle").on("click", function () {
+                var size = $('#PuzzleSize').val();
+                var words = $('#PuzzleWordList').val();
+                $.ajax({
+                    url: "/Home/BuildPuzzle",
+                    type: "GET",
+                    data: {
+                        puzzleSize: size,
+                        puzzleWords: words
+                    }
+                })
+                .done(function (result) {
+                    $("#puzzleTable").html(result);
+                });
+            });
+        });
+    </script>
+</head>
 
-<div class="row">
-    <div class="col-md-8">
-        @Html.Partial("_Puzzle")
+<body>
+    <div class="row">
+        <div class="col-md-9">
+            <div class="p-3">
+                <h4>Welcome to Word Search! Enter a number for the puzzle size, add a list of words in the textbox to the right, then click Build Puzzle to auto-generate a word search!</h4>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="p-3">
-            <a class="btn btn-default" href="">Build Puzzle</a>&nbsp;&nbsp;
-            <a class="btn btn-default" href="">Show Answers</a>
-        </div>            
+    <div class="row">
+        <div class="col-md-12">
+            <div class="p-3">
+                Puzzle Size:&nbsp; &nbsp;
+                @Html.EditorFor(model => model.PuzzleSize, new { htmlAttributes = new { @style = "width: 50px;" } });&nbsp;&nbsp;
+                <button id="buildPuzzle" class="btn btn-default">Build Puzzle</button>
+            </div>
+        </div>
     </div>
-</div>
+
+    <div class="row">
+        <div class="col-md-9">
+            <table style="width: 100%;">
+                <tr>
+                    <td id="puzzleTable" class="puzzle-box"></td>
+                    <td>@Html.TextAreaFor(model => model.PuzzleWordList);</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="p-3">                
+                <a class="btn btn-default" href="">Show Answers</a>
+            </div>
+        </div>
+    </div>
+</body>

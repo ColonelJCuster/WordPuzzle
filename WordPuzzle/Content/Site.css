@@ -18,8 +18,7 @@
 
 /* Set width on the form input elements since they're 100% wide by default */
 input,
-select,
-textarea {
+select {
     max-width: 280px;
 }
 
@@ -27,10 +26,16 @@ textarea {
     padding-top: 10px;
 }
 
+textarea {
+    width: 200px;
+    height: 600px;
+    resize: none;
+}
+
 .puzzle-box {
     border: 1px solid;
-    width: 500px;
-    height: 500px;
+    width: 600px;
+    height: 600px;
     text-align: center;
     vertical-align: middle;
     font-size: 18px;
@@ -39,12 +44,8 @@ textarea {
     border: 1px solid;
     width: 20%;
     text-align: center;
-    vertical-align: middle;
-    background-color: #eee;
-}
-.puzzle-letter {
-    width: 20px;
-    height: 20px;
+    vertical-align: top;
+    padding-top: 20px;
 }
 .highlighted {
     background-color: chartreuse;

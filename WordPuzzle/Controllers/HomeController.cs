@@ -1,30 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
+using WordPuzzle.Models;
+using WordPuzzle.ViewModels;
 
 namespace WordPuzzle.Controllers
 {
     public class HomeController : Controller
     {
+        static private PuzzleViewModel Puzzle = new PuzzleViewModel();
+
+        [HttpGet]
         public ActionResult Index()
         {
-            return View();
+            // set default values
+            Puzzle.PuzzleSize = 0;
+            Puzzle.PuzzleWordList = "";
+
+            return View(Puzzle);
         }
 
-        public ActionResult About()
+        [HttpGet]
+        public ActionResult BuildPuzzle(int puzzleSize, string puzzleWords)
         {
-            ViewBag.Message = "Your application description page.";
+            var model = new PuzzleModel(puzzleSize, puzzleWords);
 
-            return View();
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
+            return PartialView("_puzzle", model);
         }
     }
 }
