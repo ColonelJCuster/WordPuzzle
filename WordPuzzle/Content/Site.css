@@ -50,3 +50,8 @@ textarea {
 .highlighted {
     background-color: chartreuse;
 }
+
+.field-validation-error {
+    color: red;
+    font-weight: bold;
+}

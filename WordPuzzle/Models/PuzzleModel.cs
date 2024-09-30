@@ -23,7 +23,9 @@ namespace WordPuzzle.Models
 
         public List<string> PuzzleWords { get; set; } = new List<string>();
 
-        public string[,] PuzzleMatrix { get; set; }
+        public PuzzleLetterModel[,] PuzzleMatrix { get; set; }
+
+        public bool ShowAnswers { get; set; }
 
         #endregion
 
@@ -108,9 +110,10 @@ namespace WordPuzzle.Models
             for (int x = 0; x < PuzzleSize.Value; ++x)
                 for (int y = 0; y < PuzzleSize.Value; ++y)
                 {
-                    if (PuzzleMatrix[x, y] == placeholder)
+                    if (PuzzleMatrix[x, y].PuzzleLetter == placeholder)
                     {
-                        PuzzleMatrix[x, y] = GetRandomLetter();
+                        PuzzleMatrix[x, y].PuzzleLetter = GetRandomLetter();
+                        PuzzleMatrix[x, y].IsAnswer = false;
                     }
                 }
         }
@@ -153,7 +156,7 @@ namespace WordPuzzle.Models
             {
                 for (int x = column; x < column + word.Length; ++x)
                 {
-                    if (PuzzleMatrix[row, x] != placeholder && PuzzleMatrix[row, x] != word.Substring(x - column, 1))
+                    if (PuzzleMatrix[row, x].PuzzleLetter != placeholder && PuzzleMatrix[row, x].PuzzleLetter != word.Substring(x - column, 1))
                     {
                         isAvailable = false;
                         break;
@@ -164,7 +167,7 @@ namespace WordPuzzle.Models
             {
                 for (int x = row; x < row + word.Length; ++x)
                 {
-                    if (PuzzleMatrix[x, column] != placeholder && PuzzleMatrix[x, column] != word.Substring(x - row, 1))
+                    if (PuzzleMatrix[x, column].PuzzleLetter != placeholder && PuzzleMatrix[x, column].PuzzleLetter != word.Substring(x - row, 1))
                     {
                         isAvailable = false;
                         break;
@@ -175,7 +178,7 @@ namespace WordPuzzle.Models
             {
                 for (int x = 0; x < word.Length; ++x)
                 {
-                    if (PuzzleMatrix[row - x, column + x] != placeholder && PuzzleMatrix[row - x, column + x] != word.Substring(x, 1))
+                    if (PuzzleMatrix[row - x, column + x].PuzzleLetter != placeholder && PuzzleMatrix[row - x, column + x].PuzzleLetter != word.Substring(x, 1))
                     {
                         isAvailable = false;
                         break;
@@ -186,7 +189,7 @@ namespace WordPuzzle.Models
             {
                 for (int x = 0; x < word.Length; ++x)
                 {
-                    if (PuzzleMatrix[row + x, column + x] != placeholder && PuzzleMatrix[row + x, column + x] != word.Substring(x, 1))
+                    if (PuzzleMatrix[row + x, column + x].PuzzleLetter != placeholder && PuzzleMatrix[row + x, column + x].PuzzleLetter != word.Substring(x, 1))
                     {
                         isAvailable = false;
                         break;
@@ -199,8 +202,8 @@ namespace WordPuzzle.Models
 
         private bool PlotHorizontalWord(string word)
         {
-            int startingRow = random.Next(PuzzleSize.Value);
-            int startingColumn = random.Next(PuzzleSize.Value - word.Length + 1);
+            int startingRow = random.Next(PuzzleSize.Value - 1);
+            int startingColumn = random.Next(PuzzleSize.Value - word.Length);
             int currentRow = startingRow;
             int currentColumn = startingColumn;
             bool spaceAvailable = false;
@@ -213,7 +216,7 @@ namespace WordPuzzle.Models
                     spaceAvailable = IsSpaceAvailable(currentRow, currentColumn, word, WordDirection.Horizontal);
                     if (!spaceAvailable)
                     {
-                        if (currentColumn != PuzzleSize.Value - word.Length + 1)
+                        if (currentColumn != PuzzleSize.Value - word.Length)
                             ++currentColumn;
                         else
                             currentColumn = 0;
@@ -236,9 +239,9 @@ namespace WordPuzzle.Models
             {
                 for (int x = 0; x < word.Length; ++x)
                 {
-                    PuzzleMatrix[currentRow, currentColumn + x] = word.Substring(x, 1);
+                    PuzzleMatrix[currentRow, currentColumn + x].PuzzleLetter = word.Substring(x, 1);
+                    PuzzleMatrix[currentRow, currentColumn + x].IsAnswer = true;
                 }
-
             }
 
             return true;
@@ -246,8 +249,8 @@ namespace WordPuzzle.Models
 
         private bool PlotVerticalWord(string word)
         {
-            int startingRow = random.Next(PuzzleSize.Value - word.Length + 1);
-            int startingColumn = random.Next(PuzzleSize.Value);
+            int startingRow = random.Next(PuzzleSize.Value - word.Length);
+            int startingColumn = random.Next(PuzzleSize.Value - 1);
             int currentRow = startingRow;
             int currentColumn = startingColumn;
             bool spaceAvailable = false;
@@ -259,7 +262,7 @@ namespace WordPuzzle.Models
                     spaceAvailable = IsSpaceAvailable(currentRow, currentColumn, word, WordDirection.Vertical);
                     if (!spaceAvailable)
                     {
-                        if (currentRow != PuzzleSize.Value - word.Length + 1)
+                        if (currentRow != PuzzleSize.Value - word.Length)
                             ++currentRow;
                         else
                             currentRow = 0;
@@ -282,9 +285,9 @@ namespace WordPuzzle.Models
             {
                 for (int x = 0; x < word.Length; ++x)
                 {
-                    PuzzleMatrix[currentRow + x, currentColumn] = word.Substring(x, 1);
+                    PuzzleMatrix[currentRow + x, currentColumn].PuzzleLetter = word.Substring(x, 1);
+                    PuzzleMatrix[currentRow + x, currentColumn].IsAnswer = true;
                 }
-
             }
 
             return true;
@@ -309,7 +312,7 @@ namespace WordPuzzle.Models
                     spaceAvailable = IsSpaceAvailable(currentRow, currentColumn, word, WordDirection.DiagonalUp);
                     if (!spaceAvailable)
                     {
-                        if (currentColumn != word.Length - 1)
+                        if (currentColumn != PuzzleSize.Value - word.Length)
                             ++currentColumn;
                         else
                             currentColumn = 0;
@@ -318,10 +321,10 @@ namespace WordPuzzle.Models
 
                 if (!spaceAvailable)
                 {
-                    if (currentRow != PuzzleSize.Value - word.Length - 1)
+                    if (currentRow != PuzzleSize.Value - 1)
                         ++currentRow;
                     else
-                        currentRow = 0;
+                        currentRow = minimumRow;
                 }
             } while (!spaceAvailable && currentRow != startingRow);
 
@@ -332,9 +335,9 @@ namespace WordPuzzle.Models
             {
                 for (int x = 0; x < word.Length; ++x)
                 {
-                    PuzzleMatrix[currentRow - x, currentColumn + x] = word.Substring(x, 1);
+                    PuzzleMatrix[currentRow - x, currentColumn + x].PuzzleLetter = word.Substring(x, 1);
+                    PuzzleMatrix[currentRow - x, currentColumn + x].IsAnswer = true;
                 }
-
             }
 
             return true;
@@ -356,7 +359,7 @@ namespace WordPuzzle.Models
                     spaceAvailable = IsSpaceAvailable(currentRow, currentColumn, word, WordDirection.DiagonalDown);
                     if (!spaceAvailable)
                     {
-                        if (currentColumn != PuzzleSize.Value - word.Length - 1)
+                        if (currentColumn != PuzzleSize.Value - word.Length)
                             ++currentColumn;
                         else
                             currentColumn = 0;
@@ -365,7 +368,7 @@ namespace WordPuzzle.Models
 
                 if (!spaceAvailable)
                 {
-                    if (currentRow != word.Length - 1)
+                    if (currentRow != PuzzleSize.Value - word.Length)
                         ++currentRow;
                     else
                         currentRow = 0;
@@ -379,9 +382,9 @@ namespace WordPuzzle.Models
             {
                 for (int x = 0; x < word.Length; ++x)
                 {
-                    PuzzleMatrix[currentRow + x, currentColumn + x] = word.Substring(x, 1);
+                    PuzzleMatrix[currentRow + x, currentColumn + x].PuzzleLetter = word.Substring(x, 1);
+                    PuzzleMatrix[currentRow + x, currentColumn + x].IsAnswer = true;
                 }
-
             }
 
             return true;
@@ -396,14 +399,17 @@ namespace WordPuzzle.Models
         public PuzzleModel(int? puzzleSize, string puzzleWords)
         {
             PuzzleSize = puzzleSize;
+            ShowAnswers = false;
 
             // initialize matrix with empty strings
-            PuzzleMatrix = new string[puzzleSize.Value, puzzleSize.Value];
+            PuzzleMatrix = new PuzzleLetterModel[puzzleSize.Value, puzzleSize.Value];
             for (int x = 0; x < puzzleSize.Value; ++x)
             {
                 for (int y = 0; y < puzzleSize.Value; ++y)
                 {
-                    PuzzleMatrix[x, y] = placeholder;
+                    PuzzleMatrix[x, y] = new PuzzleLetterModel();
+                    PuzzleMatrix[x, y].PuzzleLetter = placeholder;
+                    PuzzleMatrix[x, y].IsAnswer = false;
                 }
             }
 
@@ -413,17 +419,9 @@ namespace WordPuzzle.Models
                 ICollection<string> words = puzzleWords.ToUpper().Split('\n');
                 foreach (string word in words)
                 {
-                    PuzzleWords.Add(word);
+                    PuzzleWords.Add(word.Replace("\r", string.Empty));
                 }
             }
-            
-            // DEBUG LINE - WE WILL MOVE THESE LAST TWO FUNCTIONS TO THE CONTROLLER WHEN WE ADD VALIDATION
-            // DEBUG LINE - FOR NOW, WE'LL TEST THESE FUNCTIONS HERE IN THE MODEL CONSTRUCTOR
-            // plot puzzle words
-            bool success = PlotWords();
-
-            // fill in remaining spaces with random letters
-            FillEmptySpacesWithRandomLetters();
         }
 
         #endregion        

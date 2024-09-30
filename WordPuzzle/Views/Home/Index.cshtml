@@ -1,21 +1,42 @@
 ﻿@model WordPuzzle.ViewModels.PuzzleViewModel
 
 <head>
+    <script src="/Scripts/jquery.validate.min.js"></script>
+    <script src="/Scripts/jquery.validate.unobtrusive.min.js"></script>
+
     <script type="text/javascript">
-        $(document).ready(function () {
-            $("#buildPuzzle").on("click", function () {
-                var size = $('#PuzzleSize').val();
-                var words = $('#PuzzleWordList').val();
+        $(function () {
+            $("#buildPuzzle").click(function (e) {
+                e.preventDefault();
+                var _this = $(this);
+                var _form = _this.closest("form");
+
+                var isvalid = _form.valid();  // Tells whether the form is valid
+
+                if (isvalid) {
+                    $.ajax({
+                        url: _form.attr("action"),
+                        type: "POST",
+                        data: _form.serialize(),
+                        success: function (data) {
+                            $("#puzzleTable").html(data);
+                            $("#puzzleErrors").empty();
+                        },
+                        error: function (errors) {                            
+                            $("#puzzleErrors").html(errors.responseJSON.errors);
+                        }
+                    });
+                }
+            });
+
+            $("#toggleAnswers").click(function (e) {
+                e.preventDefault();
                 $.ajax({
-                    url: "/Home/BuildPuzzle",
+                    url: '/Home/ToggleAnswers',
                     type: "GET",
-                    data: {
-                        puzzleSize: size,
-                        puzzleWords: words
+                    success: function (data) {
+                        $("#puzzleTable").html(data);
                     }
-                })
-                .done(function (result) {
-                    $("#puzzleTable").html(result);
                 });
             });
         });
@@ -23,40 +44,53 @@
 </head>
 
 <body>
-    <div class="row">
-        <div class="col-md-9">
-            <div class="p-3">
-                <h4>Welcome to Word Search! Enter a number for the puzzle size, add a list of words in the textbox to the right, then click Build Puzzle to auto-generate a word search!</h4>
+    @using (Html.BeginForm("BuildPuzzle", "Home", FormMethod.Post))
+    {
+        <div class="row">
+            <div class="col-md-9">
+                <div class="p-3">
+                    <h4>Welcome to Word Search! Enter a number for the puzzle size, add a list of words in the textbox to the right, then click Build Puzzle to auto-generate a word search!</h4>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="p-3">
-                Puzzle Size:&nbsp; &nbsp;
-                @Html.EditorFor(model => model.PuzzleSize, new { htmlAttributes = new { @style = "width: 50px;" } });&nbsp;&nbsp;
-                <button id="buildPuzzle" class="btn btn-default">Build Puzzle</button>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="p-3">
+                    Puzzle Size:&nbsp; &nbsp;
+                    @Html.EditorFor(model => model.PuzzleSize, new { htmlAttributes = new { @style = "width: 50px;" } });&nbsp;&nbsp;
+                    <button id="buildPuzzle" class="btn btn-default">Build Puzzle</button>
+                    @Html.ValidationMessageFor(model => model.PuzzleSize)&nbsp;&nbsp;
+                    @Html.ValidationMessageFor(model => model.PuzzleWordList)&nbsp;&nbsp;
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="col-md-9">
-            <table style="width: 100%;">
-                <tr>
-                    <td id="puzzleTable" class="puzzle-box"></td>
-                    <td>@Html.TextAreaFor(model => model.PuzzleWordList);</td>
-                </tr>
-            </table>
-        </div>
-    </div>
+        <div class="row">
+            <div class="col-md-9">
+                <div class="p-3">
+                    <div id="puzzleErrors" class="field-validation-error"></div>
+                </div>
+            </div>
+        </div>        
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="p-3">                
-                <a class="btn btn-default" href="">Show Answers</a>
+        <div class="row">
+            <div class="col-md-9">
+                <table style="width: 100%;">
+                    <tr>
+                        <td id="puzzleTable" class="puzzle-box"></td>
+                        <td>@Html.TextAreaFor(model => model.PuzzleWordList);</td>
+                    </tr>
+                </table>
             </div>
         </div>
-    </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="p-3">
+                    <button id="toggleAnswers" class="btn btn-default">Toggle Answers</button>
+                </div>
+            </div>
+        </div>
+    }
 </body>
